@@ -1,4 +1,3 @@
-using DelaunayVoronoi;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,19 +13,16 @@ public class RopeDispenser : MonoBehaviour
     [SerializeField, Tooltip("The minimum distance between two points.")]
     private float _pointStep;
 
-    [SerializeField, Tooltip("The maximum length the rope can reach.")]
-    private float _maxLength;
+    [SerializeField, Tooltip("The maximum duration the rope can reach.")]
+    private float _maxDuration;
 
-    [SerializeField]
+    [SerializeField, Tooltip("The minimum distance between this and a rope point to consider the shape closed.")]
     private float _minCloseSnapDist = 0.1f;
 
     private LineRenderer _lineRenderer;
     private float _pointStepSquared;
-    private Queue<Vector3> _points = new Queue<Vector3>();
-    private Vector3? _lastEnqueuedPoint = null;
-    private float _totalLength = 0f;
-
-    private IEnumerable<Triangle> _triangles = new List<Triangle>();
+    private Queue<PointRecord> _points = new Queue<PointRecord>();
+    private PointRecord _lastEnqueuedRecord = null;
 
     void Awake()
     {
@@ -37,64 +33,56 @@ public class RopeDispenser : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        Debug.Assert(_pointStep > _minCloseSnapDist);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(CheckCanPutRopePoint())
+        // Search a point for closing the shape
+        int? closePointIdx = FindAClosePointIndex();
+        if(closePointIdx.HasValue)
         {
-            int? closePointIdx = FindAClosePointIndex();
-            if(closePointIdx.HasValue)
-            {
-                TestInsidePoint(startIndex: closePointIdx.Value);
-            }
-
-            PutRopePoint(transform.position);
-            RemoveFarPoints();
-            UpdateLineRenderer();
+            TestInsidePoint(startIndex: closePointIdx.Value);
+            // Destroy all points until this index
+            _points.Clear();
+            _lastEnqueuedRecord = null;
         }
+
+        PutRopePointOrEditLastOne();
+        RemoveOldPoints();
+        UpdateLineRenderer();
     }
 
     /// <summary>
-    /// Put a new rope point at the current position of the object
+    /// Put a new rope point at the current position of the object or edit the last point entered if the point is not far enough from the previous one.
     /// </summary>
-    void PutRopePoint(Vector3 position)
+    void PutRopePointOrEditLastOne()
     {
         Vector3 newPoint = transform.position;
 
-        _points.Enqueue(newPoint);
-
-        if(_lastEnqueuedPoint.HasValue)
+        if(_lastEnqueuedRecord != null && (newPoint - _lastEnqueuedRecord.Point).sqrMagnitude < _pointStepSquared)
         {
-            _totalLength += (_lastEnqueuedPoint.Value - newPoint).magnitude;
+            _lastEnqueuedRecord.Time = Time.timeSinceLevelLoad;
         }
-
-        _lastEnqueuedPoint = newPoint;
-
-    }
-
-    /// <summary>
-    /// Remove the farthest points while the allowed length of the rope is exceeded.
-    /// </summary>
-    void RemoveFarPoints()
-    {
-        while(_totalLength > _maxLength && _points.Count > 0)
+        else
         {
-            RemoveFarPoint();
+            PointRecord newRecord = new PointRecord(newPoint, Time.timeSinceLevelLoad);
+            _points.Enqueue(newRecord);
+            _lastEnqueuedRecord = newRecord;
         }
     }
 
     /// <summary>
-    /// Remove the farthest points of the rope (aka the oldest).
+    /// Remove the oldest points which have exceeded the maximum duration.
     /// </summary>
-    void RemoveFarPoint()
+    void RemoveOldPoints()
     {
-        Vector3 removed = _points.Dequeue();
-        Vector3 last = _points.Peek();
-
-        _totalLength -= (last - removed).magnitude;
+        float currentTime = Time.timeSinceLevelLoad;
+        while(_points.Count > 0 && currentTime - _points.Peek().Time > _maxDuration)
+        {
+            _points.Dequeue();
+        }
     }
 
     /// <summary>
@@ -103,27 +91,15 @@ public class RopeDispenser : MonoBehaviour
     void UpdateLineRenderer()
     {
         _lineRenderer.positionCount = _points.Count;
-        _lineRenderer.SetPositions(_points.ToArray());
-    }
-
-    /// <summary>
-    /// Returns <c>true</c> if the condition are met to put a new point in the rope.
-    /// </summary>
-    /// <returns></returns>
-    bool CheckCanPutRopePoint()
-    {
-        if(_lineRenderer.positionCount == 0)
-        {
-            return true;
-        }
-
-        Vector3 _lastPointPosition = _lineRenderer.GetPosition(_lineRenderer.positionCount - 1);
-        return (transform.position - _lastPointPosition).sqrMagnitude > _pointStepSquared;
+        _lineRenderer.SetPositions(_points.Select(pointRecord => pointRecord.Point).ToArray());
     }
 
     int? FindAClosePointIndex()
     {
-        if (_points.Count == 0)
+        // Prevent for finding last put points as enclosing shape
+        const int skipPointNb = 10;
+
+        if (_points.Count <= skipPointNb)
             return null;
 
         Vector3 currentPos = transform.position;
@@ -131,10 +107,13 @@ public class RopeDispenser : MonoBehaviour
         int bestCandidate = -1;
         float minSqrMagnitude = float.PositiveInfinity;
 
-        int index = 0;
-        foreach(Vector3 point in _points)
+        int index = 1;
+
+        Vector3 prevPoint = _points.First().Point;
+
+        foreach(Vector3 point in _points.Select(pointRecord => pointRecord.Point).Skip(1).Take(_points.Count - skipPointNb))
         {
-            float sqrMagnitude = (currentPos - point).sqrMagnitude;
+            float sqrMagnitude = (point - currentPos).sqrMagnitude;
 
             if(sqrMagnitude < minSqrMagnitude)
             {
@@ -142,6 +121,7 @@ public class RopeDispenser : MonoBehaviour
                 minSqrMagnitude = sqrMagnitude;
             }
 
+            prevPoint = point;
             ++index;
         }
 
@@ -152,17 +132,12 @@ public class RopeDispenser : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        foreach(Triangle triangle in _triangles)
-        {
-            Gizmos.DrawLine(triangle.Vertices[0].XYtoVector3XZ(), triangle.Vertices[1].XYtoVector3XZ());
-            Gizmos.DrawLine(triangle.Vertices[1].XYtoVector3XZ(), triangle.Vertices[2].XYtoVector3XZ());
-            Gizmos.DrawLine(triangle.Vertices[2].XYtoVector3XZ(), triangle.Vertices[0].XYtoVector3XZ());
-        }
+        
     }
 
     public void TestInsidePoint(int startIndex = 0)
     {
-        List<Vector2> points = _points.Skip(startIndex).Select(point => new Vector2(point.x, point.z)).ToList();
+        List<Vector2> points = _points.Skip(startIndex).Select(pointRecord => new Vector2(pointRecord.Point.x, pointRecord.Point.z)).ToList();
         foreach(GameObject go in GameObject.FindGameObjectsWithTag("Interest"))
         {
             Vector2 goPoint = new Vector2(go.transform.position.x, go.transform.position.z);
@@ -180,15 +155,21 @@ public class RopeDispenser : MonoBehaviour
         }
     }
 
-    public static bool PointIsInPolygon(List<Vector2> points, Vector2 pointToTest)
+    /// <summary>
+    /// Check if <paramref name="pointToTest"/> is in <paramref name="polygon"/>.
+    /// </summary>
+    /// <param name="polygon"></param>
+    /// <param name="pointToTest"></param>
+    /// <returns></returns>
+    public static bool PointIsInPolygon(List<Vector2> polygon, Vector2 pointToTest)
     {
         bool oddPoint = false;
-        int j = points.Count - 1;
+        int j = polygon.Count - 1;
 
-        for(int i = 0; i < points.Count; ++i)
+        for(int i = 0; i < polygon.Count; ++i)
         {
-            Vector2 pointI = points[i];
-            Vector2 pointJ = points[j];
+            Vector2 pointI = polygon[i];
+            Vector2 pointJ = polygon[j];
             if (pointI.y < pointToTest.y && pointJ.y >= pointToTest.y || pointJ.y < pointToTest.y && pointI.y >= pointToTest.y)
             {
                 if (pointI.x + (pointToTest.y - pointI.y) / (pointJ.y - pointI.y) * (pointJ.x - pointI.x) < pointToTest.x)
