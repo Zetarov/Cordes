@@ -124,14 +124,32 @@ public class RopeDispenser : MonoBehaviour
 
     public void ComputeTriangulation()
     {
-        DelaunayTriangulator triangulator = new DelaunayTriangulator();
-
-        IEnumerable<Point> points = _points.Select(point => new Point(point.x, point.z));
-        foreach(var point in points)
+        foreach(GameObject go in GameObject.FindGameObjectsWithTag("Interest"))
         {
-            Debug.Log(point);
+
         }
-        triangulator.GenerateBorder(points);
-        _triangles = triangulator.BowyerWatson(points);
+    }
+
+    public static bool PointIsInPolygon(List<Vector2> points, Vector2 pointToTest)
+    {
+        bool oddPoint = false;
+        int j = points.Count - 1;
+
+        for(int i = 0; i < points.Count; ++i)
+        {
+            Vector2 pointI = points[i];
+            Vector2 pointJ = points[j];
+            if (pointI.y < pointToTest.y && pointJ.y >= pointToTest.y || pointJ.y < pointToTest.y && pointI.y >= pointToTest.y)
+            {
+                if (pointI.x + (pointToTest.y - pointI.y) / (pointJ.y - pointI.y) * (pointJ.x - pointI.x) < pointToTest.x)
+                {
+                    oddPoint = !oddPoint;
+                }
+            }
+
+            j = i;
+        }
+
+        return oddPoint;
     }
 }
