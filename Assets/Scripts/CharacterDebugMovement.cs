@@ -10,6 +10,9 @@ public class CharacterDebugMovement : MonoBehaviour
     [SerializeField]
     private float _speed = 5.0f;
 
+    [SerializeField]
+    private RopeDispenser _ropeDispenser = null;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -39,5 +42,10 @@ public class CharacterDebugMovement : MonoBehaviour
         move = move.normalized;
 
         transform.Translate(new Vector3(move.x, 0f, move.y) * _speed * Time.deltaTime);
+
+        if(Input.GetKeyUp(KeyCode.Space))
+        {
+            _ropeDispenser.ComputeTriangulation();
+        }
     }
 }

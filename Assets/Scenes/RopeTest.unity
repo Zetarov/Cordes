@@ -156,6 +156,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _speed: 5
+  _ropeDispenser: {fileID: 1578882664}
 --- !u!135 &81117945
 SphereCollider:
   m_ObjectHideFlags: 0

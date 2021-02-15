@@ -1,5 +1,7 @@
+using DelaunayVoronoi;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -19,6 +21,8 @@ public class RopeDispenser : MonoBehaviour
     private Queue<Vector3> _points = new Queue<Vector3>();
     private Vector3? _lastEnqueuedPoint = null;
     private float _totalLength = 0f;
+
+    private IEnumerable<Triangle> _triangles = new List<Triangle>();
 
     void Awake()
     {
@@ -105,5 +109,29 @@ public class RopeDispenser : MonoBehaviour
 
         Vector3 _lastPointPosition = _lineRenderer.GetPosition(_lineRenderer.positionCount - 1);
         return (transform.position - _lastPointPosition).sqrMagnitude > _pointStepSquared;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        foreach(Triangle triangle in _triangles)
+        {
+            Gizmos.DrawLine(triangle.Vertices[0].XYtoVector3XZ(), triangle.Vertices[1].XYtoVector3XZ());
+            Gizmos.DrawLine(triangle.Vertices[1].XYtoVector3XZ(), triangle.Vertices[2].XYtoVector3XZ());
+            Gizmos.DrawLine(triangle.Vertices[2].XYtoVector3XZ(), triangle.Vertices[0].XYtoVector3XZ());
+        }
+    }
+
+    public void ComputeTriangulation()
+    {
+        DelaunayTriangulator triangulator = new DelaunayTriangulator();
+
+        IEnumerable<Point> points = _points.Select(point => new Point(point.x, point.z));
+        foreach(var point in points)
+        {
+            Debug.Log(point);
+        }
+        triangulator.GenerateBorder(points);
+        _triangles = triangulator.BowyerWatson(points);
     }
 }
