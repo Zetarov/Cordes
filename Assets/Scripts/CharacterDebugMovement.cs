@@ -45,7 +45,7 @@ public class CharacterDebugMovement : MonoBehaviour
 
         if(Input.GetKeyUp(KeyCode.Space))
         {
-            _ropeDispenser.ComputeTriangulation();
+            _ropeDispenser.TestInsidePoint();
         }
     }
 }

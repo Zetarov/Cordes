@@ -2,6 +2,7 @@ using DelaunayVoronoi;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 /// <summary>
@@ -15,6 +16,9 @@ public class RopeDispenser : MonoBehaviour
 
     [SerializeField, Tooltip("The maximum length the rope can reach.")]
     private float _maxLength;
+
+    [SerializeField]
+    private float _minCloseSnapDist = 0.1f;
 
     private LineRenderer _lineRenderer;
     private float _pointStepSquared;
@@ -41,7 +45,13 @@ public class RopeDispenser : MonoBehaviour
     {
         if(CheckCanPutRopePoint())
         {
-            PutRopePoint();
+            int? closePointIdx = FindAClosePointIndex();
+            if(closePointIdx.HasValue)
+            {
+                TestInsidePoint(startIndex: closePointIdx.Value);
+            }
+
+            PutRopePoint(transform.position);
             RemoveFarPoints();
             UpdateLineRenderer();
         }
@@ -50,7 +60,7 @@ public class RopeDispenser : MonoBehaviour
     /// <summary>
     /// Put a new rope point at the current position of the object
     /// </summary>
-    void PutRopePoint()
+    void PutRopePoint(Vector3 position)
     {
         Vector3 newPoint = transform.position;
 
@@ -111,6 +121,34 @@ public class RopeDispenser : MonoBehaviour
         return (transform.position - _lastPointPosition).sqrMagnitude > _pointStepSquared;
     }
 
+    int? FindAClosePointIndex()
+    {
+        if (_points.Count == 0)
+            return null;
+
+        Vector3 currentPos = transform.position;
+
+        int bestCandidate = -1;
+        float minSqrMagnitude = float.PositiveInfinity;
+
+        int index = 0;
+        foreach(Vector3 point in _points)
+        {
+            float sqrMagnitude = (currentPos - point).sqrMagnitude;
+
+            if(sqrMagnitude < minSqrMagnitude)
+            {
+                bestCandidate = index;
+                minSqrMagnitude = sqrMagnitude;
+            }
+
+            ++index;
+        }
+
+        bool candidateRetained = minSqrMagnitude <= _minCloseSnapDist * _minCloseSnapDist;
+        return candidateRetained ? bestCandidate : null as int?;
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
@@ -122,11 +160,23 @@ public class RopeDispenser : MonoBehaviour
         }
     }
 
-    public void ComputeTriangulation()
+    public void TestInsidePoint(int startIndex = 0)
     {
+        List<Vector2> points = _points.Skip(startIndex).Select(point => new Vector2(point.x, point.z)).ToList();
         foreach(GameObject go in GameObject.FindGameObjectsWithTag("Interest"))
         {
+            Vector2 goPoint = new Vector2(go.transform.position.x, go.transform.position.z);
+            go.GetComponent<MaterialToggle>().Toggle = PointIsInPolygon(points, goPoint);
+        }
+        // quick and dirty - TODO remove it later
+        Invoke("ResetInterestPoints", 1.0f);
+    }
 
+    public void ResetInterestPoints()
+    {
+        foreach(MaterialToggle materialToggle in GameObject.FindGameObjectsWithTag("Interest").Select(go => go.GetComponent<MaterialToggle>()))
+        {
+            materialToggle.Toggle = false;
         }
     }
 
