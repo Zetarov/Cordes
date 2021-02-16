@@ -13,6 +13,9 @@ public class CharacterDebugMovement : MonoBehaviour
     [SerializeField]
     private RopeDispenser _ropeDispenser = null;
 
+    [SerializeField]
+    private PrefabDispenser _prefabDispenser = null;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -44,5 +47,6 @@ public class CharacterDebugMovement : MonoBehaviour
         transform.Translate(new Vector3(move.x, 0f, move.y) * _speed * Time.deltaTime);
 
         _ropeDispenser.Activated = Input.GetKey(KeyCode.Space);
+        _prefabDispenser.enabled = Input.GetKey(KeyCode.Space);
     }
 }
