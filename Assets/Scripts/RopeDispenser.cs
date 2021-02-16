@@ -19,10 +19,24 @@ public class RopeDispenser : MonoBehaviour
     [SerializeField, Tooltip("The minimum distance between this and a rope point to consider the shape closed.")]
     private float _minCloseSnapDist = 0.1f;
 
+    public bool Activated
+    {
+        get => _activated;
+        set
+        {
+            _activated = value;
+            if(!_activated)
+            {
+                EraseAllPoints();
+            }
+        }
+    }
+    
     private LineRenderer _lineRenderer;
     private float _pointStepSquared;
     private Queue<PointRecord> _points = new Queue<PointRecord>();
     private PointRecord _lastEnqueuedRecord = null;
+    private bool _activated = false;
 
     void Awake()
     {
@@ -40,18 +54,26 @@ public class RopeDispenser : MonoBehaviour
     void Update()
     {
         // Search a point for closing the shape
-        int? closePointIdx = FindAClosePointIndex();
-        if(closePointIdx.HasValue)
+        if(Activated)
         {
-            TestInsidePoint(startIndex: closePointIdx.Value);
-            // Destroy all points until this index
-            _points.Clear();
-            _lastEnqueuedRecord = null;
+            int? closePointIdx = FindAClosePointIndex();
+            if(closePointIdx.HasValue)
+            {
+                TestInsidePoint(startIndex: closePointIdx.Value);
+                EraseAllPoints();
+            }
+
+            PutRopePointOrEditLastOne();
         }
 
-        PutRopePointOrEditLastOne();
         RemoveOldPoints();
         UpdateLineRenderer();
+    }
+
+    void EraseAllPoints()
+    {
+        _points.Clear();
+        _lastEnqueuedRecord = null;
     }
 
     /// <summary>
@@ -97,7 +119,7 @@ public class RopeDispenser : MonoBehaviour
     int? FindAClosePointIndex()
     {
         // Prevent for finding last put points as enclosing shape
-        const int skipPointNb = 10;
+        const int skipPointNb = 3;
 
         if (_points.Count <= skipPointNb)
             return null;
