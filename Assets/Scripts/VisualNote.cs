@@ -28,16 +28,11 @@ public class VisualNote : MonoBehaviour
         foreach(DOTweenAnimation anim in _animationsForFade)
         {
             anim.DOPlay();
-            anim.onComplete.AddListener(AnimCompleted);
         }
     }
 
-    void AnimCompleted()
+    public void DestroySelf()
     {
-        ++_finishedAnim;
-        if(_finishedAnim >= _animationsForFade.Count)
-        {
-            Destroy(gameObject);
-        }
+        Destroy(gameObject);
     }
 }
