@@ -43,9 +43,6 @@ public class CharacterDebugMovement : MonoBehaviour
 
         transform.Translate(new Vector3(move.x, 0f, move.y) * _speed * Time.deltaTime);
 
-        if(Input.GetKeyUp(KeyCode.Space))
-        {
-            _ropeDispenser.TestInsidePoint();
-        }
+        _ropeDispenser.Activated = Input.GetKey(KeyCode.Space);
     }
 }
