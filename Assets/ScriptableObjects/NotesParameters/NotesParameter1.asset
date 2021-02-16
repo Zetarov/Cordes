@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 011901f03337dda40a0ee9f2124a6111, type: 3}
   m_Name: NotesParameter1
   m_EditorClassIdentifier: 
-  DelayBeforeFadingAway: 3
-  BaseColor: {r: 0.77254903, g: 0.48124495, b: 0.082352936, a: 1}
+  DelayBeforeFadingAway: 2
+  BaseColor: {r: 0.764151, g: 0.039649345, b: 0.06954868, a: 1}
