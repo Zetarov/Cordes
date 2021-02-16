@@ -31,10 +31,10 @@ public class VisualNote : MonoBehaviour
         #endregion
 
         // Appear
-        _meshRenderer.material.DOFade(0f, 0.5f).From();
+        _meshRenderer.material.DOFade(0f, _appearDuration).From();
 
         // Main loop
-        waveMoveTween = transform.DOMoveY(0.5f, _appearDuration);
+        waveMoveTween = transform.DOMoveY(0.25f, 1.0f);
         waveMoveTween.SetLoops(-1, LoopType.Yoyo);
         waveMoveTween.SetEase(Ease.InOutSine);
         waveMoveTween.SetRelative(true);
