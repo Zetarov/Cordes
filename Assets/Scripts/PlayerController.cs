@@ -15,19 +15,68 @@ public class PlayerController : MonoBehaviour
     Animator anim;
 
     [SerializeField]
+    PlayerNotesGenerator notes;
+
+    [SerializeField]
+    GameMusic music;
+
+    [SerializeField]
     TypeInstrument instrument;
+
+    [SerializeField]
+    GameObject instrumentStored;
+    [SerializeField]
+    GameObject instrumentPlayed;
+
+
+    bool isFollowing = false;
+    bool isKilling = false;
 
 
     void Start()
     {
-        
+        if (notes != null)
+        {
+            notes.SetIsAttracting(true);
+            notes.SetIsCapturing(true);
+        }
     }
 
     void Update()
     {
-        if (anim.GetInteger("Walk") == 1)
+        bool walking = anim.GetInteger("Walk") == 1;
+        bool playing = anim.GetInteger("Play") > 0;
+
+        if (walking)
         {
             gameObject.transform.Translate(Vector3.forward * Time.deltaTime * 2.0f);
+        }
+
+
+        instrumentStored.SetActive(!playing);
+        instrumentPlayed.SetActive(playing);
+
+        if(instrument == TypeInstrument.Guitar)
+        {
+            if (playing)
+                music.PlayTheme1();
+            else
+                music.StopTheme1();
+        }
+
+        else if (instrument == TypeInstrument.Flute)
+        {
+            if (playing)
+                music.PlayTheme2();
+            else
+                music.StopTheme2();
+        }
+
+
+        if(notes != null)
+        {
+            notes.SetIsAttracting(isFollowing);
+            notes.SetIsCapturing(isKilling);
         }
     }
 
@@ -40,7 +89,7 @@ public class PlayerController : MonoBehaviour
 
     public void Move(InputAction.CallbackContext context)
     {
-        Debug.Log("Move");
+        //Debug.Log("Move");
 
         Vector2 direction = context.ReadValue<Vector2>();
 
@@ -63,16 +112,18 @@ public class PlayerController : MonoBehaviour
 
     public void PlayInstrumentFollow(InputAction.CallbackContext context)
     {
-        Debug.Log("PlayInstrumentFollow ");
+        //Debug.Log("PlayInstrumentFollow ");
 
         if(context.performed)
         {
             anim.SetInteger("Play", (int)instrument + 1);
+            isFollowing = true;
         }
 
         else if(context.canceled)
         {
             anim.SetInteger("Play", 0);
+            isFollowing = false;
         }
 
         
@@ -80,16 +131,18 @@ public class PlayerController : MonoBehaviour
 
     public void PlayInstrumentKill(InputAction.CallbackContext context)
     {
-        Debug.Log("PlayInstrumentKill");
+        //Debug.Log("PlayInstrumentKill");
 
         if (context.performed)
         {
             anim.SetInteger("Play", (int)instrument + 1);
+            isKilling = true;
         }
 
         else if (context.canceled)
         {
             anim.SetInteger("Play", 0);
+            isKilling = false;
         }
     }
 }

@@ -217,6 +217,28 @@
                 },
                 {
                     "name": "",
+                    "id": "d2c8fabd-e891-443b-8e62-d420d59e432d",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "MusicLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6984cef8-4fb1-4bdf-8acf-e5f00b56f167",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "MusicLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "2298a235-27d2-47e7-8921-6a5cbaf8adc5",
                     "path": "<Mouse>/leftButton",
                     "interactions": "",
@@ -233,6 +255,28 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
+                    "action": "MusicRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "eab6117a-4e5b-4c04-bc8e-d916cec72078",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "MusicRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "209ae66d-c2b4-4db7-8dae-37af62e3c92b",
+                    "path": "<Keyboard>/rightShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
                     "action": "MusicRight",
                     "isComposite": false,
                     "isPartOfComposite": false
