@@ -1,13 +1,16 @@
+using Ludiq.PeekCore;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
 /// Handles the points of the rope.
 /// </summary>
-[RequireComponent(typeof(LineRenderer))]
 public class RopeDispenser : MonoBehaviour
 {
     [SerializeField, Tooltip("The minimum distance between two points.")]
@@ -19,6 +22,16 @@ public class RopeDispenser : MonoBehaviour
     [SerializeField, Tooltip("The minimum distance between this and a rope point to consider the shape closed.")]
     private float _minCloseSnapDist = 0.1f;
 
+    [SerializeField, Tooltip("Line renderer for debugging purpose, not mandatory")]
+    private LineRenderer _lineRenderer;
+
+    [SerializeField]
+    List<RopeDispenserEventListener> _listeners = new List<RopeDispenserEventListener>();
+
+    private UnityEventBool ActivatedChanged = new UnityEventBool();
+    private UnityEventFloat ClosedContour = new UnityEventFloat();
+    private UnityEventFloat RopeDurationChanged = new UnityEventFloat();
+
     public bool Activated
     {
         get => _activated;
@@ -29,10 +42,10 @@ public class RopeDispenser : MonoBehaviour
             {
                 EraseAllPoints();
             }
+            ActivatedChanged.Invoke(value);
         }
     }
     
-    private LineRenderer _lineRenderer;
     private float _pointStepSquared;
     private Queue<PointRecord> _points = new Queue<PointRecord>();
     private PointRecord _lastEnqueuedRecord = null;
@@ -40,14 +53,26 @@ public class RopeDispenser : MonoBehaviour
 
     void Awake()
     {
-        _lineRenderer = GetComponent<LineRenderer>();
+        Debug.Assert(_pointStep > _minCloseSnapDist);
         _pointStepSquared = _pointStep * _pointStep;
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Assert(_pointStep > _minCloseSnapDist);
+        foreach(RopeDispenserEventListener listener in _listeners)
+        {
+            AddListener(listener);
+        }
+        ActivatedChanged.Invoke(_activated);
+        RopeDurationChanged.Invoke(_maxDuration);
+    }
+
+    public void AddListener(RopeDispenserEventListener listener)
+    {
+        ActivatedChanged.AddListener(listener.OnActivatedChanged);
+        ClosedContour.AddListener(listener.OnClosedContour);
+        RopeDurationChanged.AddListener(listener.OnRopeDurationChanged);
     }
 
     // Update is called once per frame
@@ -56,11 +81,13 @@ public class RopeDispenser : MonoBehaviour
         // Search a point for closing the shape
         if(Activated)
         {
-            int? closePointIdx = FindAClosePointIndex();
-            if(closePointIdx.HasValue)
+            (int, PointRecord)? closePointRes = FindAClosePoint();
+            if(closePointRes.HasValue)
             {
-                TestInsidePoint(startIndex: closePointIdx.Value);
+                (int, PointRecord) closePoint = closePointRes.Value;
+                TestInsidePoint(startIndex: closePoint.Item1);
                 EraseAllPoints();
+                ClosedContour.Invoke(closePoint.Item2.Time);
             }
 
             PutRopePointOrEditLastOne();
@@ -112,11 +139,13 @@ public class RopeDispenser : MonoBehaviour
     /// </summary>
     void UpdateLineRenderer()
     {
+        if (_lineRenderer == null)
+            return;
         _lineRenderer.positionCount = _points.Count;
         _lineRenderer.SetPositions(_points.Select(pointRecord => pointRecord.Point).ToArray());
     }
 
-    int? FindAClosePointIndex()
+    (int, PointRecord)? FindAClosePoint()
     {
         // Prevent for finding last put points as enclosing shape
         const int skipPointNb = 3;
@@ -126,29 +155,28 @@ public class RopeDispenser : MonoBehaviour
 
         Vector3 currentPos = transform.position;
 
-        int bestCandidate = -1;
+        int bestCandidateIndex = -1;
+        PointRecord bestCandidate = null;
         float minSqrMagnitude = float.PositiveInfinity;
 
         int index = 1;
 
-        Vector3 prevPoint = _points.First().Point;
-
-        foreach(Vector3 point in _points.Select(pointRecord => pointRecord.Point).Skip(1).Take(_points.Count - skipPointNb))
+        foreach(PointRecord pointRecord in _points.Take(_points.Count - skipPointNb))
         {
-            float sqrMagnitude = (point - currentPos).sqrMagnitude;
+            float sqrMagnitude = (pointRecord.Point - currentPos).sqrMagnitude;
 
             if(sqrMagnitude < minSqrMagnitude)
             {
-                bestCandidate = index;
+                bestCandidateIndex = index;
+                bestCandidate = pointRecord;
                 minSqrMagnitude = sqrMagnitude;
             }
 
-            prevPoint = point;
             ++index;
         }
 
         bool candidateRetained = minSqrMagnitude <= _minCloseSnapDist * _minCloseSnapDist;
-        return candidateRetained ? bestCandidate : null as int?;
+        return candidateRetained ? (bestCandidateIndex, bestCandidate) : null as (int, PointRecord)?;
     }
 
     private void OnDrawGizmos()
