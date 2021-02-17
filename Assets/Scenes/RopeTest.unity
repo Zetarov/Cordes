@@ -462,6 +462,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: e5238a9d-7b6c-449f-be12-3da1dc034c6c
     m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 6a9c99d1-ca46-4ae3-86c7-66e257b551e3
+    m_ActionName: Player/MusicLeft[/Mouse/leftButton]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player
