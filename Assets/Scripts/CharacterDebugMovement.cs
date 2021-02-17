@@ -11,10 +11,19 @@ public class CharacterDebugMovement : MonoBehaviour
     private float _speed = 5.0f;
 
     [SerializeField]
-    private RopeDispenser _ropeDispenser = null;
+    private RopeDispenser _captureRopeDispenser = null;
 
     [SerializeField]
-    private PrefabDispenser _prefabDispenser = null;
+    private RopeDispenser _followRopeDispenser = null;
+
+    [SerializeField]
+    private PrefabDispenser _capturePrefabDispenser = null;
+
+    [SerializeField]
+    private PrefabDispenser _followPrefabDispenser = null;
+
+    [SerializeField]
+    private ParticleSystem _followParticleSystem = null;
 
     // Start is called before the first frame update
     void Start()
@@ -46,7 +55,24 @@ public class CharacterDebugMovement : MonoBehaviour
 
         transform.Translate(new Vector3(move.x, 0f, move.y) * _speed * Time.deltaTime);
 
-        _ropeDispenser.Activated = Input.GetKey(KeyCode.Space);
-        _prefabDispenser.enabled = Input.GetKey(KeyCode.Space);
+        bool isCapturing = Input.GetKey(KeyCode.Keypad0);
+        bool isMakingFollow = Input.GetKey(KeyCode.Keypad2);
+
+        // Capture
+        _captureRopeDispenser.Activated = isCapturing;
+        _capturePrefabDispenser.enabled = isCapturing;
+        
+        // Follow
+        _followRopeDispenser.Activated = isMakingFollow;
+        if(isMakingFollow)
+        {
+            _followParticleSystem.Play();
+        }
+        else
+        {
+            _followParticleSystem.Stop();
+        }
+        _followPrefabDispenser.enabled = isMakingFollow;
+
     }
 }

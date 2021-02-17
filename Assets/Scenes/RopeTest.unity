@@ -268,7 +268,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _speed: 2.5
   _ropeDispenser: {fileID: 1578882664}
-  _prefabDispenser: {fileID: 992051340}
+  _prefabDispenser: {fileID: 0}
 --- !u!135 &81117945
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1028,6 +1028,18 @@ MonoBehaviour:
   preset: 0
   onEnableBehaviour: 0
   onDisableBehaviour: 0
+--- !u!114 &184149389
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 184149386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad85bedf73ed7d14180c5f676a5aed3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &197933326
 GameObject:
   m_ObjectHideFlags: 0
@@ -3463,15 +3475,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 992051338}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b29620fa2e17ce041b8091dcabda0d77, type: 3}
+  m_Script: {fileID: 11500000, guid: 7931cc443b02bae49a72cb8b65b5ac00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _prefabs:
-  - {fileID: 7423670198101816651, guid: 2fe6ed8cb53570743a8647e071d33c85, type: 3}
-  - {fileID: 2518292252451829378, guid: f1712c33a4ba4c647a8c9698cf87b7ae, type: 3}
-  - {fileID: 6411352842169609289, guid: 2028b420695402d488c41232d3d8ddb5, type: 3}
   - {fileID: 5054389213836933138, guid: 0c8a05667537a394ebf485aa29e3f7a5, type: 3}
+  - {fileID: 6411352842169609289, guid: 2028b420695402d488c41232d3d8ddb5, type: 3}
+  - {fileID: 2518292252451829378, guid: f1712c33a4ba4c647a8c9698cf87b7ae, type: 3}
+  - {fileID: 7423670198101816651, guid: 2fe6ed8cb53570743a8647e071d33c85, type: 3}
   _distance: 1
+  _ropeDispenser: {fileID: 1578882664}
 --- !u!1 &1053370305
 GameObject:
   m_ObjectHideFlags: 0
@@ -3643,6 +3656,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1070230486 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2518292252451829378, guid: f1712c33a4ba4c647a8c9698cf87b7ae, type: 3}
+  m_PrefabInstance: {fileID: 5040910895449962898}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1070230487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1070230486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad85bedf73ed7d14180c5f676a5aed3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1189002792
 GameObject:
   m_ObjectHideFlags: 0
@@ -9039,7 +9069,7 @@ GameObject:
   - component: {fileID: 1578882663}
   - component: {fileID: 1578882664}
   m_Layer: 0
-  m_Name: Ropes
+  m_Name: RopeDispenser
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9946,6 +9976,23 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2087367246}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &2123844541 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5054389213836933138, guid: 0c8a05667537a394ebf485aa29e3f7a5, type: 3}
+  m_PrefabInstance: {fileID: 2387717608266923498}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2123844542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2123844541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad85bedf73ed7d14180c5f676a5aed3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2138332027
 GameObject:
   m_ObjectHideFlags: 0

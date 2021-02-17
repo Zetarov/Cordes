@@ -17,13 +17,16 @@ public class RopeDispenser : MonoBehaviour
     private float _pointStep;
 
     [SerializeField, Tooltip("The maximum duration the rope can reach.")]
-    private float _maxDuration;
+    private float _duration = 4f;
 
     [SerializeField, Tooltip("The minimum distance between this and a rope point to consider the shape closed.")]
     private float _minCloseSnapDist = 0.1f;
 
     [SerializeField, Tooltip("Line renderer for debugging purpose, not mandatory")]
     private LineRenderer _lineRenderer;
+
+    [SerializeField, Tooltip("Erase all points on disactivation")]
+    private bool _eraseOnDisactivation = true;
 
     [SerializeField]
     List<RopeDispenserEventListener> _listeners = new List<RopeDispenserEventListener>();
@@ -37,13 +40,20 @@ public class RopeDispenser : MonoBehaviour
         get => _activated;
         set
         {
+            if (_activated == value)
+                return;
             _activated = value;
-            if(!_activated)
+            if(!_activated && _eraseOnDisactivation)
             {
                 EraseAllPoints();
             }
-            ActivatedChanged.Invoke(value);
+            ActivatedChanged.Invoke(_activated);
         }
+    }
+
+    public float Duration
+    {
+        get => _duration;
     }
     
     private float _pointStepSquared;
@@ -53,7 +63,6 @@ public class RopeDispenser : MonoBehaviour
 
     void Awake()
     {
-        Debug.Assert(_pointStep > _minCloseSnapDist);
         _pointStepSquared = _pointStep * _pointStep;
     }
 
@@ -65,7 +74,7 @@ public class RopeDispenser : MonoBehaviour
             AddListener(listener);
         }
         ActivatedChanged.Invoke(_activated);
-        RopeDurationChanged.Invoke(_maxDuration);
+        RopeDurationChanged.Invoke(_duration);
     }
 
     public void AddListener(RopeDispenserEventListener listener)
@@ -73,6 +82,13 @@ public class RopeDispenser : MonoBehaviour
         ActivatedChanged.AddListener(listener.OnActivatedChanged);
         ClosedContour.AddListener(listener.OnClosedContour);
         RopeDurationChanged.AddListener(listener.OnRopeDurationChanged);
+    }
+
+    public void RemoveListener(RopeDispenserEventListener listener)
+    {
+        ActivatedChanged.RemoveListener(listener.OnActivatedChanged);
+        ClosedContour.RemoveListener(listener.OnClosedContour);
+        RopeDurationChanged.RemoveListener(listener.OnRopeDurationChanged);
     }
 
     // Update is called once per frame
@@ -128,7 +144,7 @@ public class RopeDispenser : MonoBehaviour
     void RemoveOldPoints()
     {
         float currentTime = Time.timeSinceLevelLoad;
-        while(_points.Count > 0 && currentTime - _points.Peek().Time > _maxDuration)
+        while(_points.Count > 0 && currentTime - _points.Peek().Time > _duration)
         {
             _points.Dequeue();
         }
