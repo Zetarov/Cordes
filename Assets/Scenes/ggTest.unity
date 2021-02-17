@@ -21616,6 +21616,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   anim: {fileID: 824605764}
+  instrument: 0
 --- !u!95 &824605764 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 9571340, guid: 97c46f85ed671244b83b2409f56039d1, type: 3}
@@ -46234,6 +46235,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   anim: {fileID: 1754285831}
+  instrument: 1
 --- !u!95 &1754285831 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 9520156, guid: f7e586317327fe240bef5a82944f49c2, type: 3}

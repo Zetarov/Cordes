@@ -5,8 +5,18 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    public enum TypeInstrument
+    {
+        Guitar,
+        Flute
+    }
+
     [SerializeField]
     Animator anim;
+
+    [SerializeField]
+    TypeInstrument instrument;
+
 
     void Start()
     {
@@ -53,11 +63,33 @@ public class PlayerController : MonoBehaviour
 
     public void PlayInstrumentFollow(InputAction.CallbackContext context)
     {
-        Debug.Log("PlayInstrumentFollow");
+        Debug.Log("PlayInstrumentFollow ");
+
+        if(context.performed)
+        {
+            anim.SetInteger("Play", (int)instrument + 1);
+        }
+
+        else if(context.canceled)
+        {
+            anim.SetInteger("Play", 0);
+        }
+
+        
     }
 
     public void PlayInstrumentKill(InputAction.CallbackContext context)
     {
         Debug.Log("PlayInstrumentKill");
+
+        if (context.performed)
+        {
+            anim.SetInteger("Play", (int)instrument + 1);
+        }
+
+        else if (context.canceled)
+        {
+            anim.SetInteger("Play", 0);
+        }
     }
 }
