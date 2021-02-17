@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     {
         if (anim.GetInteger("Walk") == 1)
         {
-            gameObject.transform.Translate(Vector3.forward * Time.deltaTime * 3.0f);
+            gameObject.transform.Translate(Vector3.forward * Time.deltaTime * 2.0f);
         }
     }
 
@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour
 
         Vector2 direction = context.ReadValue<Vector2>();
 
-        if(Mathf.Abs(direction.x) > 0.01f || Mathf.Abs(direction.y) > 0.01f)
+        if(Mathf.Abs(direction.x) > 0.25f || Mathf.Abs(direction.y) > 0.25f)
         {
             anim.SetInteger("Walk", 1);
 
