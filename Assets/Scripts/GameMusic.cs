@@ -54,6 +54,12 @@ public class GameMusic : MonoBehaviour
         audio_environnement.mute = false;
     }
 
+    ///POUET
+    public void PlayTheme1(){ playTheme1 = true; }
+    public void PlayTheme2() { playTheme2 = true; }
+    public void StopTheme1() { playTheme1 = false; }
+    public void StopTheme2() { playTheme2 = false; }
+
     // Update is called once per frame
     void Update() {
         audio_theme1.mute = !playTheme1;
