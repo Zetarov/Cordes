@@ -1,8 +1,10 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class VisualNote : MonoBehaviour
 {
@@ -12,10 +14,11 @@ public class VisualNote : MonoBehaviour
     [SerializeField]
     NotesParametersScriptableObject _parameters = null;
 
-    private DG.Tweening.Core.TweenerCore<Vector3, Vector3, DG.Tweening.Plugins.Options.VectorOptions> waveMoveTween;
-
     public float Duration = 4f;
 
+    [NonSerialized]
+    public UnityEvent AboutToBeDestroyed = new UnityEvent();
+    private DG.Tweening.Core.TweenerCore<Vector3, Vector3, DG.Tweening.Plugins.Options.VectorOptions> waveMoveTween;
     private const float _appearDurationProp = 0.25f;
     private const float _disappearDuration = 1.0f;
     private Coroutine _lifeCoroutine = null;
@@ -72,5 +75,10 @@ public class VisualNote : MonoBehaviour
         yield return new WaitForSeconds(_disappearDuration);
 
         Destroy(gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        AboutToBeDestroyed.Invoke();
     }
 }

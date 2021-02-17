@@ -1,6 +1,8 @@
+using Ludiq.OdinSerializer.Utilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// A debugging class to move a debug character, the final game will use Unity's input system to handle character movement.
@@ -10,69 +12,100 @@ public class CharacterDebugMovement : MonoBehaviour
     [SerializeField]
     private float _speed = 5.0f;
 
+    [Header("Capture related")]
     [SerializeField]
     private RopeDispenser _captureRopeDispenser = null;
 
     [SerializeField]
-    private RopeDispenser _followRopeDispenser = null;
+    private NotePrefabDispenser _capturePrefabDispenser = null;
 
     [SerializeField]
-    private PrefabDispenser _capturePrefabDispenser = null;
+    private List<CutableTrailRenderer> _captureTrailRenderers = new List<CutableTrailRenderer>();
+
+    [Header("Attract related")]
+    [SerializeField]
+    private RopeDispenser _attractRopeDispenser = null;
 
     [SerializeField]
-    private PrefabDispenser _followPrefabDispenser = null;
+    private NotePrefabDispenser _attractPrefabDispenser = null;
 
     [SerializeField]
-    private ParticleSystem _followParticleSystem = null;
+    private ParticleSystem _attractParticleSystem = null;
+
+    bool _isCapturing = false;
+    bool _isAttracting = false;
+    bool _isMoving = false;
+
+    Vector2 _direction;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        _captureRopeDispenser.ClosedContour.AddListener(OnCaptureClosedContour);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        Vector2 move = new Vector2(0f, 0f);
-        if(Input.GetKey(KeyCode.Z))
-        {
-            move.y += 1f;
-        }
-        if(Input.GetKey(KeyCode.S))
-        {
-            move.y -= 1f;
-        }
-        if(Input.GetKey(KeyCode.Q))
-        {
-            move.x -= 1f;
-        }
-        if(Input.GetKey(KeyCode.D))
-        {
-            move.x += 1f;
-        }
-        move = move.normalized;
+        if(_isMoving)
+            transform.Translate(new Vector3(_direction.x, 0f, _direction.y) * _speed * Time.deltaTime);
+    }
 
-        transform.Translate(new Vector3(move.x, 0f, move.y) * _speed * Time.deltaTime);
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        _direction = context.ReadValue<Vector2>();
 
-        bool isCapturing = Input.GetKey(KeyCode.Keypad0);
-        bool isMakingFollow = Input.GetKey(KeyCode.Keypad2);
+        _isMoving = _direction.sqrMagnitude > 0.1f;
+    }
 
-        // Capture
-        _captureRopeDispenser.Activated = isCapturing;
-        _capturePrefabDispenser.enabled = isCapturing;
-        
-        // Follow
-        _followRopeDispenser.Activated = isMakingFollow;
-        if(isMakingFollow)
+    public void OnFire(InputAction.CallbackContext context)
+    {
+        SetIsCapturing(context.ReadValueAsButton());
+    }
+
+    protected virtual void OnCaptureClosedContour(float time)
+    {
+        _capturePrefabDispenser.FadeAllNotes();
+        _captureTrailRenderers.ForEach(cutableTrailRenderer => cutableTrailRenderer.Shorten(0f, endEmitting: false));
+    }
+
+    protected virtual void SetIsCapturing(bool value)
+    {
+        if (_isCapturing == value)
+            return;
+
+        _isCapturing = value;
+        if(_isCapturing)
         {
-            _followParticleSystem.Play();
+            _captureTrailRenderers.ForEach(el => el.TrailRenderer.emitting = true);
+            _capturePrefabDispenser.enabled = true;
+            _captureRopeDispenser.Activated = true;
         }
         else
         {
-            _followParticleSystem.Stop();
+            _captureTrailRenderers.ForEach(el => el.Shorten(0f, endEmitting: true));
+            _capturePrefabDispenser.enabled = false;
+            _capturePrefabDispenser.FadeAllNotes();
+            _captureRopeDispenser.Activated = false;
         }
-        _followPrefabDispenser.enabled = isMakingFollow;
+    }
 
+    protected virtual void SetIsAttracting(bool value)
+    {
+        if (_isAttracting == value)
+            return;
+
+        _isAttracting = value;
+        if (_isAttracting)
+        {
+            _attractParticleSystem.Play();
+            _attractPrefabDispenser.enabled = true;
+            _attractRopeDispenser.Activated = true;
+        }
+        else
+        {
+            _attractParticleSystem.Stop();
+            _attractPrefabDispenser.enabled = false;
+            _attractRopeDispenser.Activated = false;
+        }
     }
 }

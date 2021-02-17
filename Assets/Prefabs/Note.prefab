@@ -91,7 +91,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7804170921747640305}
   - component: {fileID: 7423670198101816692}
-  - component: {fileID: 3800345111437986463}
   m_Layer: 0
   m_Name: Note
   m_TagString: Untagged
@@ -128,15 +127,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _meshRenderer: {fileID: 4353795466967756128}
   _parameters: {fileID: 11400000, guid: 05007dd038067ab4596a111aca2f8eb0, type: 2}
---- !u!114 &3800345111437986463
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7423670198101816651}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad85bedf73ed7d14180c5f676a5aed3d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  Duration: 3
