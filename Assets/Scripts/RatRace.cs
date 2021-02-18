@@ -30,7 +30,8 @@ public class RatRace : MonoBehaviour
         STATE_IDLE,
         STATE_AVOIDING,
         STATE_FLEEING,
-        STATE_BLOCKED
+        STATE_BLOCKED,
+        STATE_FOLLOW
     }
 
 
@@ -55,14 +56,14 @@ public class RatRace : MonoBehaviour
     void FixedUpdate()
     {
         bool isPlayerNear = false;
-        bool isPlayerFar = false;
+        bool isPlayerFar = true;
 
         foreach (GameObject player in players)
         {
             float playerDist = (player.transform.position - transform.position).magnitude;
 
             isPlayerNear = playerDist < 2.5f || isPlayerNear; // au moins un joueur près
-            isPlayerFar = playerDist > 6.2f; // les deux joueurs loin
+            isPlayerFar = isPlayerFar && playerDist > 6.2f; // les deux joueurs loin
 
             if(playerDist < 2.5f)
             {
@@ -103,19 +104,20 @@ public class RatRace : MonoBehaviour
 
     void MoveIdle()
     {
-        Debug.Log("JUST CHILLING");
+        //Debug.Log("JUST CHILLING");
 
         //float targetDist = (moveTarget - transform.position).magnitude;
 
         //if(targetDist < 0.1f && cptFrames % 180 == 0)
         if (cptMove <= 0)
         {
-            float newDirX = Random.Range(-1.0f, 1.0f);
+            /*float newDirX = Random.Range(-1.0f, 1.0f);
             float newDirY = Random.Range(-1.0f, 1.0f);
 
-            //moveDir = transform.position + new Vector3(newX, newY, 0f);
+            moveDir = new Vector3(newDirX, 0f, newDirY).normalized;*/
 
-            moveDir = new Vector3(newDirX, 0f, newDirY).normalized;
+            moveDir = new Vector3(Random.value * 2f - 1f, 0f, Random.value * 2f - 1f).normalized;
+
             cptMove = Random.Range(0, 180);
 
         }
@@ -130,47 +132,31 @@ public class RatRace : MonoBehaviour
         moveDir = (transform.position - target.transform.position).normalized;
         moveDir.y = 0f;
 
-        MoveTowardsTarget(6.0f);
+        MoveTowardsTarget(14.0f);
     }
 
     void MoveAvoiding()
     {
-        Debug.Log("AVOID " + target.name);
+        //Debug.Log("AVOID " + target.name);
 
         //moveTarget = transform.position + (transform.position - player.transform.position).normalized;
 
         moveDir = (transform.position - target.transform.position).normalized;
         moveDir.y = 0f;
 
-        MoveTowardsTarget(6.0f);
+        MoveTowardsTarget(14.0f);
     }
 
 
-    void MoveTowardsTarget(float s = 2.0f)
+    void MoveTowardsTarget(float s = 6.5f)
     {
-        // en fait on va limiter à 4 directions
-
-        /*if (Mathf.Abs(moveDir.x) > Mathf.Abs(moveDir.y)) // déplacement horizontal
-        {
-            //_spriteRenderer.flipX = (moveDir.x < 0);
-            if (_animator.GetInteger("dir") != 3) _animator.SetInteger("dir", 3);
-
-
-            moveDir.y = 0;
-        }
-
-        else // déplacement vertical
-        {
-            if (moveDir.y > 0) _animator.SetInteger("dir", 1);
-            else if (_animator.GetInteger("dir") != 2) _animator.SetInteger("dir", 2);
-
-            moveDir.x = 0;
-        }*/
-
-
         float angle = Vector2.SignedAngle(Vector2.up, new Vector2(moveDir.x, moveDir.z));
 
         gameObject.transform.rotation = Quaternion.Euler(new Vector3(0f, -angle, 0f));
+
+        Debug.DrawLine(gameObject.transform.position, transform.position + moveDir, Color.red);
+
+        Vector3 oldPos = _rb.position;
 
         if (s > 0.01f)
         {
@@ -184,6 +170,15 @@ public class RatRace : MonoBehaviour
         }
 
         --cptMove;
+
+        Vector3 newPos = _rb.position;
+
+        if(Vector3.Distance(oldPos, newPos) < 0.01f)
+        {
+            cptMove = 0;
+            state = ANIMAL_STATE.STATE_IDLE;
+        }
+
     }
 
 
@@ -205,32 +200,6 @@ public class RatRace : MonoBehaviour
         {
             state = ANIMAL_STATE.STATE_IDLE;
         }
-
-        /*else if (isPlayerBiting) // on est mordu donc québlo
-        {
-            //Debug.Log("OUILLE");
-            state = ANIMAL_STATE.STATE_BLOCKED;
-        }*/
-
-        /*else if (state == ANIMAL_STATE.STATE_ATTACKING) // seul moyen de sortir du mode attaque = player trop loin ou se faire mordre
-        {
-
-        }*/
-
-        /*else if (isPlayerAttacking) // il y a une agression pas trop loin (moins loin que far) :o
-        {
-            if (Type == ANIMAL_TYPE.TYPE_RABBIT) // lapin : on court comme un lapin
-            {
-                state = ANIMAL_STATE.STATE_FLEEING;
-            }
-
-            else // loup : on attaque aussi
-            {
-                state = ANIMAL_STATE.STATE_ATTACKING;
-
-                SoundSystem.Instance.PlayWolfAttack();
-            }
-        }*/
 
         else if (isPlayerNear) // player trop près : on a pas trop confiance
         {
@@ -259,6 +228,18 @@ public class RatRace : MonoBehaviour
         {
             state = ANIMAL_STATE.STATE_IDLE;
         }
+    }
+
+
+    void OnCollisionEnter(Collision collision)
+    {
+        //Debug.Log("COLL WITH " + collision.collider.name);
+
+        /*cptMove = 0;
+        state = ANIMAL_STATE.STATE_IDLE;*/
+
+        cptMove /= 2;
+        moveDir = -moveDir;
     }
 
 }

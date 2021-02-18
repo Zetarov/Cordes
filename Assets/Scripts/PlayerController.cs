@@ -15,6 +15,9 @@ public class PlayerController : MonoBehaviour
     Animator anim;
 
     [SerializeField]
+    Rigidbody rb;
+
+    [SerializeField]
     PlayerNotesGenerator notes;
 
     [SerializeField]
@@ -49,7 +52,8 @@ public class PlayerController : MonoBehaviour
 
         if (walking)
         {
-            gameObject.transform.Translate(Vector3.forward * Time.deltaTime * 2.0f);
+            //gameObject.transform.Translate(Vector3.forward * Time.deltaTime * 2.0f);
+            rb.MovePosition(rb.position + gameObject.transform.forward * Time.deltaTime * 2.0f);
         }
 
 
@@ -114,7 +118,7 @@ public class PlayerController : MonoBehaviour
     {
         //Debug.Log("PlayInstrumentFollow ");
 
-        if(context.performed)
+        if(context.performed && !isKilling)
         {
             anim.SetInteger("Play", (int)instrument + 1);
             isFollowing = true;
@@ -133,7 +137,7 @@ public class PlayerController : MonoBehaviour
     {
         //Debug.Log("PlayInstrumentKill");
 
-        if (context.performed)
+        if (context.performed && !isFollowing)
         {
             anim.SetInteger("Play", (int)instrument + 1);
             isKilling = true;
