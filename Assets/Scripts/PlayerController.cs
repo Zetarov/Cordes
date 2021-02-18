@@ -35,7 +35,6 @@ public class PlayerController : MonoBehaviour
     bool isFollowing = false;
     bool isKilling = false;
 
-
     void Start()
     {
         if (notes != null)
@@ -79,8 +78,8 @@ public class PlayerController : MonoBehaviour
 
         if(notes != null)
         {
-            notes.SetIsAttracting(isFollowing);
-            notes.SetIsCapturing(isKilling);
+            notes.SetIsAttracting(IsFollowing);
+            notes.SetIsCapturing(IsKilling);
         }
     }
 
@@ -118,16 +117,16 @@ public class PlayerController : MonoBehaviour
     {
         //Debug.Log("PlayInstrumentFollow ");
 
-        if(context.performed && !isKilling)
+        if(context.performed && !IsKilling)
         {
             anim.SetInteger("Play", (int)instrument + 1);
-            isFollowing = true;
+            IsFollowing = true;
         }
 
         else if(context.canceled)
         {
             anim.SetInteger("Play", 0);
-            isFollowing = false;
+            IsFollowing = false;
         }
 
         
@@ -137,16 +136,21 @@ public class PlayerController : MonoBehaviour
     {
         //Debug.Log("PlayInstrumentKill");
 
-        if (context.performed && !isFollowing)
+        if (context.performed && !IsFollowing)
         {
             anim.SetInteger("Play", (int)instrument + 1);
-            isKilling = true;
+            IsKilling = true;
         }
 
         else if (context.canceled)
         {
             anim.SetInteger("Play", 0);
-            isKilling = false;
+            IsKilling = false;
         }
     }
+
+
+
+    public bool IsFollowing { get => isFollowing; set => isFollowing = value; }
+    public bool IsKilling { get => isKilling; set => isKilling = value; }
 }

@@ -12,7 +12,7 @@ public class RatRace : MonoBehaviour
 
 
     [SerializeField]
-    List<GameObject> players = new List<GameObject>();
+    List<PlayerController> players = new List<PlayerController>();
 
 
     Vector3 moveDir;
@@ -22,16 +22,16 @@ public class RatRace : MonoBehaviour
     Rigidbody _rb;
     Animator _animator;
 
-    GameObject target;
+    PlayerController target;
 
 
     public enum ANIMAL_STATE
     {
         STATE_IDLE,
         STATE_AVOIDING,
-        STATE_FLEEING,
-        STATE_BLOCKED,
-        STATE_FOLLOW
+        //STATE_FLEEING,
+        //STATE_BLOCKED,
+        STATE_FOLLOWING
     }
 
 
@@ -42,6 +42,8 @@ public class RatRace : MonoBehaviour
 
         _rb = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();
+
+        players = new List<PlayerController>(GameObject.FindObjectsOfType<PlayerController>());
     }
 
 
@@ -58,16 +60,23 @@ public class RatRace : MonoBehaviour
         bool isPlayerNear = false;
         bool isPlayerFar = true;
 
-        foreach (GameObject player in players)
+        target = null;
+
+        foreach (PlayerController player in players)
         {
             float playerDist = (player.transform.position - transform.position).magnitude;
 
-            isPlayerNear = playerDist < 2.5f || isPlayerNear; // au moins un joueur près
-            isPlayerFar = isPlayerFar && playerDist > 6.2f; // les deux joueurs loin
+            isPlayerNear = playerDist < 5.5f || isPlayerNear; // au moins un joueur près
+            isPlayerFar = isPlayerFar && playerDist > 7.5f; // les deux joueurs loin
 
-            if(playerDist < 2.5f)
+            if(playerDist < 5.5f)
             {
                 target = player;
+
+                if(target.IsFollowing)
+                {
+                    break;
+                }
             }
         }
 
@@ -87,17 +96,10 @@ public class RatRace : MonoBehaviour
                 MoveAvoiding();
                 break;
 
-            case ANIMAL_STATE.STATE_FLEEING:
-                MoveFleeing();
-                break;
-
-            case ANIMAL_STATE.STATE_BLOCKED:
-                _animator.SetFloat("Speed", 0f);
+            case ANIMAL_STATE.STATE_FOLLOWING:
+                MoveFollowing();
                 break;
         }
-
-        //_rb.velocity = new Vector2();
-
     }
 
 
@@ -106,16 +108,8 @@ public class RatRace : MonoBehaviour
     {
         //Debug.Log("JUST CHILLING");
 
-        //float targetDist = (moveTarget - transform.position).magnitude;
-
-        //if(targetDist < 0.1f && cptFrames % 180 == 0)
         if (cptMove <= 0)
         {
-            /*float newDirX = Random.Range(-1.0f, 1.0f);
-            float newDirY = Random.Range(-1.0f, 1.0f);
-
-            moveDir = new Vector3(newDirX, 0f, newDirY).normalized;*/
-
             moveDir = new Vector3(Random.value * 2f - 1f, 0f, Random.value * 2f - 1f).normalized;
 
             cptMove = Random.Range(0, 180);
@@ -125,9 +119,9 @@ public class RatRace : MonoBehaviour
         MoveTowardsTarget();
     }
 
-    void MoveFleeing()
+    void MoveAvoiding()
     {
-        Debug.Log("FLEE");
+        //Debug.Log("AVOID " + target.name);
 
         moveDir = (transform.position - target.transform.position).normalized;
         moveDir.y = 0f;
@@ -135,16 +129,22 @@ public class RatRace : MonoBehaviour
         MoveTowardsTarget(14.0f);
     }
 
-    void MoveAvoiding()
+
+    void MoveFollowing()
     {
-        //Debug.Log("AVOID " + target.name);
-
-        //moveTarget = transform.position + (transform.position - player.transform.position).normalized;
-
-        moveDir = (transform.position - target.transform.position).normalized;
+        moveDir = -(transform.position - target.transform.position).normalized;
         moveDir.y = 0f;
 
-        MoveTowardsTarget(14.0f);
+        if (Vector3.Distance(_rb.position, target.transform.position) > 2.0f)
+        {
+            MoveTowardsTarget(3.5f);
+        }
+
+        else
+        {
+            //_animator.SetFloat("Speed", 0f);
+            MoveTowardsTarget(0.0f);
+        }
     }
 
 
@@ -186,9 +186,6 @@ public class RatRace : MonoBehaviour
     {
         Debug.Log("RIP");
 
-        /*if (Type == ANIMAL_TYPE.TYPE_WOLF) SoundSystem.Instance.PlayCriToutou();
-        else SoundSystem.Instance.PlayCriLapinou();*/
-
         Destroy(gameObject);
     }
 
@@ -196,37 +193,23 @@ public class RatRace : MonoBehaviour
     // pour rester générique
     void CalcState(bool isPlayerNear, bool isPlayerFar)
     {
-        if (isPlayerFar) // oklm
+        if (isPlayerFar || target == null) // oklm
         {
             state = ANIMAL_STATE.STATE_IDLE;
         }
 
         else if (isPlayerNear) // player trop près : on a pas trop confiance
         {
-            if (state == ANIMAL_STATE.STATE_BLOCKED) // on vient d'être relaché
+            if (target.IsFollowing)
             {
-                //state = ANIMAL_STATE.STATE_FLEEING;
-
-                //if (Type == ANIMAL_TYPE.TYPE_RABBIT)
-                {
-                    state = ANIMAL_STATE.STATE_FLEEING;
-                }
-
-                /*else
-                {
-                    state = ANIMAL_STATE.STATE_ATTACKING;
-                }*/
+                state = ANIMAL_STATE.STATE_FOLLOWING;
             }
 
             else
             {
                 state = ANIMAL_STATE.STATE_AVOIDING;
             }
-        }
 
-        else
-        {
-            state = ANIMAL_STATE.STATE_IDLE;
         }
     }
 
