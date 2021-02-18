@@ -2929,6 +2929,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 738423135}
+  - component: {fileID: 738423136}
   m_Layer: 0
   m_Name: MagicWater
   m_TagString: Untagged
@@ -2952,6 +2953,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &738423136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 738423134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d494fdeec8d52140ab5216fdb32a478, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _spotlight: {fileID: 1157988757}
 --- !u!1 &750147617
 GameObject:
   m_ObjectHideFlags: 0
@@ -3792,8 +3806,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1157988755}
   m_LocalRotation: {x: 0.70697993, y: -0, z: -0, w: 0.7072336}
-  m_LocalPosition: {x: 0, y: 2.3206458, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 0.1}
+  m_LocalPosition: {x: 0, y: 2, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 738423135}
   m_RootOrder: 1
@@ -3812,8 +3826,8 @@ Light:
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 3.18
   m_Range: 3.59
-  m_SpotAngle: 30
-  m_InnerSpotAngle: 21.80208
+  m_SpotAngle: 24.947327
+  m_InnerSpotAngle: 0
   m_CookieSize: 10
   m_Shadows:
     m_Type: 2
