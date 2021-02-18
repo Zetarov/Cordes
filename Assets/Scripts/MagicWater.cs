@@ -36,6 +36,13 @@ public class MagicWater : MonoBehaviour
 
         DOTween.To(SetLightIntensity, 7f, 0f, disappearDuration).SetDelay(durationBeforeDisappear);
         transform.DOScale(new Vector3(0f, transform.localScale.y, 0f), disappearDuration).SetDelay(durationBeforeDisappear);
+
+        Invoke("DestroySelf", durationBeforeDisappear + disappearDuration + 0.1f);
+    }
+
+    void DestroySelf()
+    {
+        Destroy(gameObject);
     }
 
     void SetLightAngle(float angle)
