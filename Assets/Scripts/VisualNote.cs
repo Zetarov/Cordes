@@ -11,7 +11,18 @@ public class VisualNote : MonoBehaviour
     MeshRenderer _meshRenderer = null;
 
     [SerializeField]
-    NotesParametersScriptableObject _parameters = null;
+    private Color _color;
+
+    public Color Color
+    {
+        get => _color;
+        set
+        {
+            _color = value;
+            _meshRenderer.material.SetColor("_EmissionColor", value);
+            _meshRenderer.material.color = Color.Lerp(value, Color.white, 0.5f);
+        }
+    }
 
     public float Duration = 4f;
 
@@ -32,8 +43,8 @@ public class VisualNote : MonoBehaviour
     {
         #region Initialization
         _meshRenderer.material = new Material(_meshRenderer.material);
-        _meshRenderer.material.color = Color.Lerp(_parameters.BaseColor, Color.white, 0.5f);
-        _meshRenderer.material.SetColor("_EmissionColor", _parameters.BaseColor);
+        _meshRenderer.material.color = Color.Lerp(_color, Color.white, 0.5f);
+        _meshRenderer.material.SetColor("_EmissionColor", _color);
         #endregion
 
         // Appear
