@@ -1,3 +1,5 @@
+using DG.Tweening;
+using Ludiq.PeekCore;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,6 +28,9 @@ public class RopeDispenser : MonoBehaviour
 
     [SerializeField]
     private bool _isCaptureRopeDispenser = true;
+
+    [SerializeField]
+    private GameObject _magicWater = null;
 
     [System.NonSerialized]
     public UnityEventFloat ClosedContour = new UnityEventFloat();
@@ -180,14 +185,73 @@ public class RopeDispenser : MonoBehaviour
         
     }
 
+    public static float GetRadius(IEnumerable<Vector2> points)
+    {
+        float minX = points.First().x;
+        float minY = points.First().y;
+        float maxX = minX;
+        float maxY = minY;
+
+        foreach(Vector2 point in points)
+        {
+            if(point.x < minX)
+            {
+                minX = point.x;
+            }
+            if(point.x > maxX)
+            {
+                maxX = point.x;
+            }
+
+            if (point.y < minY)
+            {
+                minY = point.y;
+            }
+            if (point.y > maxY)
+            {
+                maxY = point.y;
+            }
+        }
+
+        return Mathf.Max(maxX - minX, maxY - minY) / 2f;
+    }
+
+    public static Vector2 GetMean(IEnumerable<Vector2> points)
+    {
+        return points.Aggregate(Vector2.zero,
+            (sum, newEl) => sum += newEl,
+            sum => sum / points.Count());
+    }
+
     public void TestInsidePoint(int startIndex = 0)
     {
         List<Vector2> points = _points.Skip(startIndex).Select(pointRecord => new Vector2(pointRecord.Point.x, pointRecord.Point.z)).ToList();
+        if (points.Count == 0)
+            return;
+
         foreach(GameObject go in GameObject.FindGameObjectsWithTag("Interest"))
         {
             Vector2 goPoint = new Vector2(go.transform.position.x, go.transform.position.z);
             go.GetComponent<MaterialToggle>().Toggle = PointIsInPolygon(points, goPoint);
         }
+
+        // Pop magic water
+        float radius = GetRadius(points);
+        Vector2 meanPos = GetMean(points);
+        GameObject magicWater = Instantiate(_magicWater, new Vector3(meanPos.x, 0f, meanPos.y), Quaternion.identity);
+        magicWater.GetComponent<MagicWater>().Appear(radius);
+
+        // Make rats die
+        GameObject.FindGameObjectsWithTag("Rat")
+            .Where(go => PointIsInPolygon(points, go.transform.position.XZ()))
+            .ForEach(go => { 
+                go.transform
+                    .DOMoveY(-0.5f, 1f)
+                    .SetRelative(true)
+                    .SetDelay(1.5f);
+            })
+            .Select(go => go.GetComponent<Animator>())
+            .ForEach(animator => animator.SetTrigger("Die"));
         // quick and dirty - TODO remove it later
         Invoke("ResetInterestPoints", 1.0f);
     }
