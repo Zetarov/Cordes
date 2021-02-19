@@ -8,6 +8,8 @@ using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance;
+
     [SerializeField]
     Transform parentRats;
     [SerializeField]
@@ -17,7 +19,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     float minTimeBetweenRats = 5.0f;
     [SerializeField]
-    float maxTimeBetweenRats = 20.0f;
+    float maxTimeBetweenRats = 12.0f;
 
     [SerializeField]
     DOTweenAnimation animScore;
@@ -28,9 +30,18 @@ public class GameManager : MonoBehaviour
     TextMeshProUGUI labelScore;
 
     [SerializeField]
+    [ColorUsageAttribute(true, true)]
     Color colorWinning = Color.green;
     [SerializeField]
+    [ColorUsageAttribute(true, true)]
     Color colorLosing = Color.red;
+
+    [SerializeField]
+    GameObject victory;
+    [SerializeField]
+    GameObject fail;
+    [SerializeField]
+    GameObject fireworks;
 
     //[SerializeField]
     int scoreWin = 0;
@@ -43,15 +54,24 @@ public class GameManager : MonoBehaviour
     int cptFrames = 0;
     float cptTime = 0f;
 
+    bool isManagingScoreDisplay = false;
+
 
     void Awake()
     {
+        Instance = this;
+
         RatRace.NbrRats = 0;
     }
 
     void Start()
     {
         StartCoroutine(RatsGenerator());
+    }
+
+    void OnDestroy()
+    {
+        Instance = null;   
     }
 
     void Update()
@@ -63,23 +83,10 @@ public class GameManager : MonoBehaviour
     {
         if(labelScore != null)
         {
-            float t = (float)RatRace.NbrRats / (float)scoreLose;
-
-            if(RatRace.NbrRats.ToString("00") != labelScore.text)
+            if (RatRace.NbrRats.ToString("00") != labelScore.text && !isManagingScoreDisplay)
             {
-                if (animScore != null)
-                {
-                    animScore.DORestart();
-                }
-
-                if(animRat != null)
-                {
-                    animRat.DORestart();
-                }
+                StartCoroutine(ManageScoreDisplay());
             }
-
-            labelScore.text = RatRace.NbrRats.ToString("00");
-            labelScore.color = Color.Lerp(colorWinning, colorLosing, t);
         }
 
 
@@ -101,11 +108,49 @@ public class GameManager : MonoBehaviour
     }
 
 
+
+    IEnumerator ManageScoreDisplay()
+    {
+        isManagingScoreDisplay = true;
+
+        /*if(int.Parse(labelScore.text) > RatRace.NbrRats) // on a tué des rats
+        {
+            ScreenShake(1.25f, new Vector3(0.30f, 0.25f, 0.30f));
+        }*/
+
+        float t = (float)RatRace.NbrRats / (float)scoreLose;
+
+        if (animScore != null)
+        {
+            animScore.DORestart();
+        }
+
+        if (animRat != null)
+        {
+            animRat.DORestart();
+        }
+
+        yield return new WaitForSeconds(0.75f);
+
+        labelScore.text = RatRace.NbrRats.ToString("00");
+        labelScore.color = Color.Lerp(colorWinning, colorLosing, t).WithA(labelScore.color.a);
+
+        isManagingScoreDisplay = false;
+    }
+
+
     IEnumerator Win()
     {
         Debug.Log("WIN");
 
         gameOver = true;
+
+        victory.SetActive(true);
+
+        yield return new WaitForSeconds(0.75f);
+        fireworks.SetActive(true);
+        ScreenShake(2.00f, new Vector3(0.70f, 0.20f, 0.70f));
+        yield return new WaitForSeconds(4.25f);
 
         SceneManager.LoadScene(0);
 
@@ -117,6 +162,12 @@ public class GameManager : MonoBehaviour
         Debug.Log("LOSE");
 
         gameOver = true;
+
+        fail.SetActive(true);
+
+        yield return new WaitForSeconds(0.75f);
+        ScreenShake(2.00f, new Vector3(0.70f, 0.20f, 0.70f));
+        yield return new WaitForSeconds(4.25f);
 
         SceneManager.LoadScene(0);
 
@@ -137,5 +188,12 @@ public class GameManager : MonoBehaviour
             GameObject newRat = GameObject.Instantiate(prefabsRats[typeRat], parentRats);
             newRat.transform.position = generatorsRats[spawner].transform.position.WithY(0f);
         }
+    }
+
+
+
+    public void ScreenShake(float time, Vector3 strength)
+    {
+        Camera.main.transform.DOShakePosition(time, strength);
     }
 }

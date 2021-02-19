@@ -12,6 +12,9 @@ public class PlayerController : MonoBehaviour
     }
 
     [SerializeField]
+    PlayerInput inp;
+
+    [SerializeField]
     Animator anim;
 
     [SerializeField]
@@ -34,6 +37,11 @@ public class PlayerController : MonoBehaviour
 
     bool isFollowing = false;
     bool isKilling = false;
+
+    // retour haptique
+    List<Gamepad> listVibrating = new List<Gamepad>();
+
+
 
     void Start()
     {
@@ -85,7 +93,15 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        
+        if(isFollowing)
+        {
+            VibrateController(0.20f, 0.04f, 0.08f, inp);
+        }
+
+        else if(isKilling)
+        {
+            VibrateController(0.20f, 0.32f, 0.22f, inp);
+        }
     }
 
 
@@ -147,6 +163,71 @@ public class PlayerController : MonoBehaviour
             anim.SetInteger("Play", 0);
             IsKilling = false;
         }
+    }
+
+
+
+    // faire vibrer une ou plusieurs manettes
+    public void VibrateController(float time, float motor1, float motor2, PlayerInput inp = null /*bool allControllers = true*/)
+    {
+        // Rumble the  low - frequency (left) motor at motor1 / 1 speed and the high-frequency
+        // (right) motor at motor2 / 1 speed.
+
+        if (inp == null || inp.devices.Count == 0)
+        {
+            StartCoroutine(VibrateControllerCoroutine(time, motor1, motor2, null));
+        }
+
+        else if (inp.devices[0] is Gamepad)
+        {
+            StartCoroutine(VibrateControllerCoroutine(time, motor1, motor2, (Gamepad)inp.devices[0]));
+        }
+    }
+
+    IEnumerator VibrateControllerCoroutine(float time, float motor1, float motor2, Gamepad gamepad)
+    {
+        //Debug.Log("VibrateControllerCoroutine " + Gamepad.all.Count);
+
+        if (gamepad == null)
+        {
+            List<Gamepad> l = new List<Gamepad>();
+
+            foreach (Gamepad g in Gamepad.all)
+            {
+                if (!listVibrating.Contains(g))
+                {
+                    //Debug.Log("RUMBLE");
+                    listVibrating.Add(g);
+                    l.Add(g);
+                    g.SetMotorSpeeds(motor1, motor2);
+                }
+            }
+
+            yield return new WaitForSeconds(time);
+
+            foreach (Gamepad g in l)
+            {
+                g.SetMotorSpeeds(0f, 0f);
+                listVibrating.Remove(g);
+            }
+        }
+
+        else // seulement la manette actuelle (TO FIX -> lier joueur / manette)
+        {
+            //Debug.Log(gamepad);
+
+            if (!listVibrating.Contains(gamepad))
+            {
+                listVibrating.Add(gamepad);
+
+                gamepad.SetMotorSpeeds(motor1, motor2);
+                yield return new WaitForSeconds(time);
+                gamepad.SetMotorSpeeds(0f, 0f);
+
+                listVibrating.Remove(gamepad);
+            }
+        }
+
     }
 
 

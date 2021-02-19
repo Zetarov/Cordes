@@ -248,6 +248,12 @@ public class RopeDispenser : MonoBehaviour
                     .DOMoveY(-0.5f, 1f)
                     .SetRelative(true)
                     .SetDelay(1.5f);
+
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.ScreenShake(1.50f, new Vector3(0.40f, 0.25f, 0.40f));
+                }
+
                 Destroy(go, 2.0f);
             })
             .Select(go => go.GetComponent<Animator>())

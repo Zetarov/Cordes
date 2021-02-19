@@ -16,6 +16,9 @@ public class RatRace : MonoBehaviour
     [SerializeField]
     List<PlayerController> players = new List<PlayerController>();
 
+    [SerializeField]
+    Light lightFollow;
+
 
     Vector3 moveDir;
     int cptMove = 0;
@@ -25,6 +28,8 @@ public class RatRace : MonoBehaviour
     Animator _animator;
 
     PlayerController target;
+
+    float lastTimeObstacle = 0f;
 
 
     public enum ANIMAL_STATE
@@ -42,6 +47,11 @@ public class RatRace : MonoBehaviour
     {
         ++NbrRats;
 
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ScreenShake(0.70f, new Vector3(0.10f, 0.05f, 0.10f));
+        }
+
         moveDir = new Vector3();
 
         _rb = GetComponent<Rigidbody>();
@@ -53,6 +63,11 @@ public class RatRace : MonoBehaviour
     void OnDestroy()
     {
         --NbrRats;
+
+        /*if(GameManager.Instance != null)
+        {
+            GameManager.Instance.ScreenShake(1.25f, new Vector3(0.40f, 0.35f, 0.40f));
+        }*/
     }
 
     void Update()
@@ -64,6 +79,11 @@ public class RatRace : MonoBehaviour
 
     void FixedUpdate()
     {
+        if(lightFollow != null)
+        {
+            lightFollow.enabled = state == ANIMAL_STATE.STATE_FOLLOWING;
+        }
+
         bool isPlayerNear = false;
         bool isPlayerFar = true;
 
@@ -119,7 +139,14 @@ public class RatRace : MonoBehaviour
         {
             moveDir = new Vector3(Random.value * 2f - 1f, 0f, Random.value * 2f - 1f).normalized;
 
-            cptMove = Random.Range(0, 450);
+            cptMove = Random.Range(0, 350);
+
+            if (cptMove < 100)
+            {
+                moveDir /= 10f;
+                cptMove *= 3;
+                //moveDir = new Vector3();
+            }
 
         }
 
@@ -133,7 +160,7 @@ public class RatRace : MonoBehaviour
         moveDir = (transform.position - target.transform.position).normalized;
         moveDir.y = 0f;
 
-        MoveTowardsTarget(14.0f);
+        MoveTowardsTarget(17.0f);
     }
 
 
@@ -165,6 +192,12 @@ public class RatRace : MonoBehaviour
 
         Vector3 oldPos = _rb.position;
 
+        if(moveDir.magnitude < 0.2f)
+        {
+            //Debug.Log("OKKKK");
+            s = 0f;
+        }
+
         if (s > 0.01f)
         {
             _animator.SetFloat("Speed", s);
@@ -180,7 +213,7 @@ public class RatRace : MonoBehaviour
 
         Vector3 newPos = _rb.position;
 
-        if(Vector3.Distance(oldPos, newPos) < 0.01f)
+        if(Vector3.Distance(oldPos, newPos) < 0.01f && s > 0.01f)
         {
             cptMove = 0;
             state = ANIMAL_STATE.STATE_IDLE;
@@ -228,8 +261,20 @@ public class RatRace : MonoBehaviour
         /*cptMove = 0;
         state = ANIMAL_STATE.STATE_IDLE;*/
 
-        cptMove /= 2;
-        moveDir = -moveDir;
+        if ((Time.time - lastTimeObstacle) < 0.5f)
+        {
+            cptMove = 0;
+            state = ANIMAL_STATE.STATE_IDLE;
+            target = null;
+        }
+
+        else
+        {
+            lastTimeObstacle = Time.time;
+
+            cptMove /= 2;
+            moveDir = -moveDir;
+        }
     }
 
 }
