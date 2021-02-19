@@ -61,6 +61,21 @@ public class CutableTrailRenderer : MonoBehaviour
         _shortenCoroutine = null;
     }
 
+    public void StartEmitting()
+    {
+        if(_shortenCoroutine != null)
+        {
+            StopCoroutine(_shortenCoroutine);
+        }
+        _trailRenderer.emitting = true;
+        SyncTime();
+    }
+
+    public void StopEmission()
+    {
+        Shorten(0f, endEmitting: true);
+    }
+
     private void SyncTime()
     {
         _trailRenderer.time = _time;

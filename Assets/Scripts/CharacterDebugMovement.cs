@@ -76,7 +76,7 @@ public class CharacterDebugMovement : MonoBehaviour
         _isCapturing = value;
         if(_isCapturing)
         {
-            _captureTrailRenderers.ForEach(el => el.TrailRenderer.emitting = true);
+            _captureTrailRenderers.ForEach(el => el.StartEmitting());
             _capturePrefabDispenser.enabled = true;
             _captureRopeDispenser.Activated = true;
         }
