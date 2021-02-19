@@ -66,6 +66,10 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        #if !UNITY_EDITOR
+        UnityEngine.Cursor.visible = false;
+        #endif
+
         StartCoroutine(RatsGenerator());
     }
 
@@ -113,7 +117,7 @@ public class GameManager : MonoBehaviour
     {
         isManagingScoreDisplay = true;
 
-        /*if(int.Parse(labelScore.text) > RatRace.NbrRats) // on a tué des rats
+        /*if(int.Parse(labelScore.text) > RatRace.NbrRats) // on a tuï¿½ des rats
         {
             ScreenShake(1.25f, new Vector3(0.30f, 0.25f, 0.30f));
         }*/
