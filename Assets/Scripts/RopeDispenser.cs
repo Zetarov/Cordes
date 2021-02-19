@@ -248,6 +248,7 @@ public class RopeDispenser : MonoBehaviour
                     .DOMoveY(-0.5f, 1f)
                     .SetRelative(true)
                     .SetDelay(1.5f);
+                Destroy(go, 2.0f);
             })
             .Select(go => go.GetComponent<Animator>())
             .ForEach(animator => animator.SetTrigger("Die"));

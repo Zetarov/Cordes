@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -18,6 +19,10 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     float maxTimeBetweenRats = 20.0f;
 
+    [SerializeField]
+    DOTweenAnimation animScore;
+    [SerializeField]
+    DOTweenAnimation animRat;
 
     [SerializeField]
     TextMeshProUGUI labelScore;
@@ -59,6 +64,19 @@ public class GameManager : MonoBehaviour
         if(labelScore != null)
         {
             float t = (float)RatRace.NbrRats / (float)scoreLose;
+
+            if(RatRace.NbrRats.ToString("00") != labelScore.text)
+            {
+                if (animScore != null)
+                {
+                    animScore.DORestart();
+                }
+
+                if(animRat != null)
+                {
+                    animRat.DORestart();
+                }
+            }
 
             labelScore.text = RatRace.NbrRats.ToString("00");
             labelScore.color = Color.Lerp(colorWinning, colorLosing, t);
@@ -117,7 +135,7 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(timeWaiting);
 
             GameObject newRat = GameObject.Instantiate(prefabsRats[typeRat], parentRats);
-            newRat.transform.position = generatorsRats[spawner].transform.position.WithY(38.769f);
+            newRat.transform.position = generatorsRats[spawner].transform.position.WithY(0f);
         }
     }
 }
