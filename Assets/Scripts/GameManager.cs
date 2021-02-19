@@ -149,6 +149,7 @@ public class GameManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.75f);
         fireworks.SetActive(true);
+        MusicManager.main.PlayEffect("Victory", 3.0f);
         ScreenShake(2.00f, new Vector3(0.70f, 0.20f, 0.70f));
         yield return new WaitForSeconds(4.25f);
 
@@ -167,6 +168,7 @@ public class GameManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.75f);
         ScreenShake(2.00f, new Vector3(0.70f, 0.20f, 0.70f));
+        MusicManager.main.PlayEffect("Fail", 3.0f);
         yield return new WaitForSeconds(4.25f);
 
         SceneManager.LoadScene(0);
@@ -187,6 +189,8 @@ public class GameManager : MonoBehaviour
 
             GameObject newRat = GameObject.Instantiate(prefabsRats[typeRat], parentRats);
             newRat.transform.position = generatorsRats[spawner].transform.position.WithY(0f);
+
+            MusicManager.main.PlayEffect("Pop");
         }
     }
 

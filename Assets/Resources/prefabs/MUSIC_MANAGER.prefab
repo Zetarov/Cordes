@@ -50,4 +50,6 @@ MonoBehaviour:
   musicVolume: 1
   effectVolume: 1
   allMusics: []
-  allSoundsEffects: []
+  allSoundsEffects:
+  - name: 
+    variants: []

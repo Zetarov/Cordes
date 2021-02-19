@@ -254,6 +254,8 @@ public class RopeDispenser : MonoBehaviour
                     GameManager.Instance.ScreenShake(1.50f, new Vector3(0.40f, 0.25f, 0.40f));
                 }
 
+                MusicManager.main.PlayEffect("Kill");
+
                 Destroy(go, 2.0f);
             })
             .Select(go => go.GetComponent<Animator>())
