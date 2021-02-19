@@ -29,12 +29,12 @@ public class MagicWater : MonoBehaviour
         float alpha = Mathf.Atan2(radius * 2f, height) * Mathf.Rad2Deg;
 
         DOTween.To(SetLightAngle, 0f, alpha, duration);
-        DOTween.To(SetLightIntensity, 0f, 7f, duration);
+        DOTween.To(SetLightIntensity, 0f, 3.5f, duration);
 
         const float durationBeforeDisappear = 2f;
         const float disappearDuration = 1f;
 
-        DOTween.To(SetLightIntensity, 7f, 0f, disappearDuration).SetDelay(durationBeforeDisappear);
+        DOTween.To(SetLightIntensity, 0f, 0f, disappearDuration).SetDelay(durationBeforeDisappear);
         transform.DOScale(new Vector3(0f, transform.localScale.y, 0f), disappearDuration).SetDelay(durationBeforeDisappear);
 
         Invoke("DestroySelf", durationBeforeDisappear + disappearDuration + 0.1f);

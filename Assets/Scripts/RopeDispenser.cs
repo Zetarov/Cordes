@@ -148,7 +148,7 @@ public class RopeDispenser : MonoBehaviour
     (int, PointRecord)? FindAClosePoint()
     {
         // Prevent for finding last put points as enclosing shape
-        const int skipPointNb = 3;
+        const int skipPointNb = 10;
 
         if (_points.Count <= skipPointNb)
             return null;
@@ -182,7 +182,6 @@ public class RopeDispenser : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        
     }
 
     public static float GetRadius(IEnumerable<Vector2> points)
