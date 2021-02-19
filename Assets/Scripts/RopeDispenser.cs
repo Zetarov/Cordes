@@ -182,7 +182,6 @@ public class RopeDispenser : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        
     }
 
     public static float GetRadius(IEnumerable<Vector2> points)
