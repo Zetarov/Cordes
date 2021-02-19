@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class RatRace : MonoBehaviour
 {
+    public static int NbrRats = 0;
+
     public float Speed = 0.01f;
 
     public ANIMAL_STATE state = ANIMAL_STATE.STATE_IDLE;
@@ -38,6 +40,8 @@ public class RatRace : MonoBehaviour
 
     void Start()
     {
+        ++NbrRats;
+
         moveDir = new Vector3();
 
         _rb = GetComponent<Rigidbody>();
@@ -46,7 +50,10 @@ public class RatRace : MonoBehaviour
         players = new List<PlayerController>(GameObject.FindObjectsOfType<PlayerController>());
     }
 
-
+    void OnDestroy()
+    {
+        --NbrRats;
+    }
 
     void Update()
     {
@@ -112,7 +119,7 @@ public class RatRace : MonoBehaviour
         {
             moveDir = new Vector3(Random.value * 2f - 1f, 0f, Random.value * 2f - 1f).normalized;
 
-            cptMove = Random.Range(0, 180);
+            cptMove = Random.Range(0, 450);
 
         }
 
