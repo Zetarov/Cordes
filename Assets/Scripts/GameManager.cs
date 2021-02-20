@@ -183,7 +183,9 @@ public class GameManager : MonoBehaviour
 
     IEnumerator RatsGenerator()
     {
-        while(true)
+        yield return new WaitForSeconds(10.0f);
+
+        while (true)
         {
             int typeRat = Random.Range(0, prefabsRats.Count);
             int spawner = Random.Range(0, generatorsRats.Count);
